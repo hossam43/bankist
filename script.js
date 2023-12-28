@@ -63,16 +63,46 @@ const inputClosePin = document.querySelector(".form__input--pin");
 
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
-// LECTURES
 
-const currencies = new Map([
-  ["USD", "United States dollar"],
-  ["EUR", "Euro"],
-  ["GBP", "Pound sterling"],
-]);
+const displayMovement = function (movements) {
+  containerMovements.innerHTML = "";
+  movements.forEach(function (mov, i) {
+    const type = mov > 0 ? "deposit" : "withdrawal";
+    const html = `
+    <div class="movements__row">
+      <div class="movements__type movements__type--${type}">${i} ${type}</div>
+        <div class="movements__value">${mov}</div>
+      </div>
+    `;
+    containerMovements.insertAdjacentHTML("afterbegin", html);
+  });
+};
 
-const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+displayMovement(account1.movements);
 
-/////////////////////////////////////////////////
+// ! Coding challenge
 
-console.log("hello from script");
+const dogsJuliaArr = [3, 5, 2, 12, 7];
+const dogsKateArr = [4, 1, 15, 8, 3];
+
+// const dogsJuliaCopy = [...dogsJuliaArr].slice(1, -1);
+// dogsJuliaCopy.shift();
+// dogsJuliaCopy.pop();
+// console.log(dogsJuliaCopy);
+
+// whether a dog is an adult (<= 3) or a puppy (> 3)
+
+const checkDogs = function (dogsJulia, dogsKate) {
+  // const dogsJuliaCopy =dogsJulia.slice(); this can copy the array
+  const dogsJuliaCopy = [...dogsJulia].slice(1, -2);
+  const dogsArr = [...dogsJuliaCopy, ...dogsKate];
+  dogsArr.forEach(function (dogAge, i) {
+    dogAge >= 3
+      ? console.log(`Dog number ${i + 1} 
+    is an adult, and is ${dogAge} years old`)
+      : console.log(`Dog number ${i + 1} is still a puppy🐶`);
+  });
+  console.log(dogsArr);
+};
+
+checkDogs(dogsJuliaArr, dogsKateArr);
