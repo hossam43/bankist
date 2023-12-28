@@ -80,29 +80,42 @@ const displayMovement = function (movements) {
 
 displayMovement(account1.movements);
 
-// ! Coding challenge
+// const createUserName = function (user) {
+//   const userName = user
+//     .toLowerCase()
+//     .trim()
+//     .split(" ")
+//     .map((name) => name[0])
+//     .join("");
+//   return userName;
+// };
 
-const dogsJuliaArr = [3, 5, 2, 12, 7];
-const dogsKateArr = [4, 1, 15, 8, 3];
+// // My way
+// console.log(createUserName("Steven Thomas Williams"));
 
-// const dogsJuliaCopy = [...dogsJuliaArr].slice(1, -1);
-// dogsJuliaCopy.shift();
-// dogsJuliaCopy.pop();
-// console.log(dogsJuliaCopy);
+// take a closer look that the map function allways going to retun in each itteration
 
-// whether a dog is an adult (<= 3) or a puppy (> 3)
+// compute one user name foreach of the account holders in our account array
 
-const checkDogs = function (dogsJulia, dogsKate) {
-  // const dogsJuliaCopy =dogsJulia.slice(); this can copy the array
-  const dogsJuliaCopy = [...dogsJulia].slice(1, -2);
-  const dogsArr = [...dogsJuliaCopy, ...dogsKate];
-  dogsArr.forEach(function (dogAge, i) {
-    dogAge >= 3
-      ? console.log(`Dog number ${i + 1} 
-    is an adult, and is ${dogAge} years old`)
-      : console.log(`Dog number ${i + 1} is still a puppy🐶`);
+// we want to modify the object (the element allready exist) not to create a new array
+
+const createUserName = function (accs) {
+  // modify the array that we get as an input
+  // it is a side effect to change the original account array
+  accs.forEach(function (acc) {
+    // creating a new property
+    acc.username = acc.owner
+      .toLowerCase()
+      .trim()
+      .split(" ")
+      .map((name) => name[0])
+      .join("");
   });
-  console.log(dogsArr);
 };
 
-checkDogs(dogsJuliaArr, dogsKateArr);
+// My way
+createUserName(accounts);
+
+// don't rellay on arrady existing data and just use the data here as arguments for your function
+
+// we didn't return anything we simply produce a side effect
