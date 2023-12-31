@@ -64,21 +64,21 @@ const inputClosePin = document.querySelector(".form__input--pin");
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 
-const displayMovement = function (movements) {
+const displayMovements = function (movements) {
   containerMovements.innerHTML = "";
   movements.forEach(function (mov, i) {
     const type = mov > 0 ? "deposit" : "withdrawal";
     const html = `
     <div class="movements__row">
       <div class="movements__type movements__type--${type}">${i} ${type}</div>
-        <div class="movements__value">${mov}</div>
+        <div class="movements__value">${mov}€</div>
       </div>
     `;
     containerMovements.insertAdjacentHTML("afterbegin", html);
   });
 };
 
-displayMovement(account1.movements);
+//? displayMovement(account1.movements);
 
 // const createUserName = function (user) {
 //   const userName = user
@@ -119,3 +119,83 @@ createUserName(accounts);
 // don't rellay on arrady existing data and just use the data here as arguments for your function
 
 // we didn't return anything we simply produce a side effect
+
+// const calcPrintBalance = function (movements) {
+//   const balance = movements.reduce((acc, mov) => acc + mov, 0);
+//   labelBalance.textContent = `${balance}€`;
+// };
+
+// calcPrintBalance(account1.movements);
+
+// do if foreach account
+
+const calcDisplayBalance = function (movements) {
+  // creating a new property
+  const balance = movements.reduce((acc, mov) => acc + mov, 0);
+  labelBalance.textContent = `${balance}€`;
+};
+// calcDisplayBalance(account1.movements);
+// console.log(account1);
+
+// take the whole account
+const calcDisplaySummary = function (acc) {
+  const incomes = acc.movements
+    .filter((mov) => mov > 0)
+    .reduce((acc, mov) => acc + mov, 0);
+  labelSumIn.textContent = `${incomes}€`;
+  const out = acc.movements
+    .filter((mov) => mov < 0)
+    .reduce((acc, mov) => acc + mov, 0);
+  labelSumOut.textContent = `${Math.abs(out)}€`;
+  const interest = acc.movements
+    .filter((mov) => mov > 0)
+    // %1.2 | each one has it's own interestRate
+    .map((deposit) => (deposit * acc.interestRate) / 100)
+    .filter((int, i, arr) => {
+      console.log(arr);
+      // if the interst >= 1
+      return int >= 1;
+    })
+    .reduce((acc, int) => acc + int, 0);
+  labelSumInterest.textContent = `${interest}€`;
+};
+
+// calcDisplaySummary(account1.movements);
+
+// don't over chaining with huge arrays
+// it is a bad practice to chain a method that mutet the original array like the splic and the reverse method
+
+// Event handlers for login
+let currentAccount;
+btnLogin.addEventListener("click", function (e) {
+  //in html the defult behaver for a submet btn is to reloaud the page
+  // prevent form submission
+  e.preventDefault();
+  // both field simulate click
+  currentAccount = accounts.find(
+    (acc) => acc.username === inputLoginUsername.value
+  );
+  console.log(currentAccount);
+  // check pin
+  // convert
+  // fix error with optional chaing
+  // if (currentAccount && currentAccount.pin === Number(inputLoginPin.value))
+  if (currentAccount?.pin === Number(inputLoginPin.value)) {
+    // Display UI and welcome message
+    labelWelcome.textContent = `Welcome back, ${
+      currentAccount.owner.split(" ")[0]
+    }`;
+    containerApp.style.opacity = "1";
+    // clear input fields
+    inputLoginUsername.value = inputLoginPin.value = "";
+    // lose the blinking
+    inputLoginPin.blur();
+    // Display movements
+    displayMovements(currentAccount.movements);
+    // Display balance
+    calcDisplayBalance(currentAccount.movements);
+    // Display summary
+    calcDisplaySummary(currentAccount);
+    console.log("LOGIN");
+  }
+});
