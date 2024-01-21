@@ -64,9 +64,11 @@ const inputClosePin = document.querySelector(".form__input--pin");
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 
-const displayMovements = function (movements) {
+const displayMovements = function (movements, sort = false) {
   containerMovements.innerHTML = "";
-  movements.forEach(function (mov, i) {
+  // splice to copy and chain
+  const movs = sort ? movements.splice().sort((a, b) => a - b) : movements;
+  movs.forEach(function (mov, i) {
     const type = mov > 0 ? "deposit" : "withdrawal";
     const html = `
     <div class="movements__row">
@@ -116,6 +118,17 @@ const createUserName = function (accs) {
 // My way
 createUserName(accounts);
 
+const updateUI = function (acc) {
+  // Display movements
+  displayMovements(acc.movements);
+  // Display balance
+  // calcDisplayBalance(currentAccount.movements);
+  // needs to be called with the complete account
+  calcDisplayBalance(acc);
+  // Display summary
+  calcDisplaySummary(acc);
+};
+
 // don't rellay on arrady existing data and just use the data here as arguments for your function
 
 // we didn't return anything we simply produce a side effect
@@ -129,10 +142,18 @@ createUserName(accounts);
 
 // do if foreach account
 
-const calcDisplayBalance = function (movements) {
+// const calcDisplayBalance = function (movements) {
+//   // creating a new property
+//   const balance = movements.reduce((acc, mov) => acc + mov, 0);
+//   labelBalance.textContent = `${balance}€`;
+// };
+// want to have access to the balance
+// ! (acc) This is like currentAccount and account1 account2
+// ! pointing to the same place in the heap
+const calcDisplayBalance = function (acc) {
   // creating a new property
-  const balance = movements.reduce((acc, mov) => acc + mov, 0);
-  labelBalance.textContent = `${balance}€`;
+  acc.balance = acc.movements.reduce((acc, mov) => acc + mov, 0);
+  labelBalance.textContent = `${acc.balance}€`;
 };
 // calcDisplayBalance(account1.movements);
 // console.log(account1);
@@ -172,6 +193,9 @@ btnLogin.addEventListener("click", function (e) {
   // prevent form submission
   e.preventDefault();
   // both field simulate click
+  //! this is not a copy of the object
+  //! this is like a anthoer variable that point to the same original object in the memory heap
+  // ! like account1 / account2 / account3
   currentAccount = accounts.find(
     (acc) => acc.username === inputLoginUsername.value
   );
@@ -190,12 +214,91 @@ btnLogin.addEventListener("click", function (e) {
     inputLoginUsername.value = inputLoginPin.value = "";
     // lose the blinking
     inputLoginPin.blur();
-    // Display movements
-    displayMovements(currentAccount.movements);
-    // Display balance
-    calcDisplayBalance(currentAccount.movements);
-    // Display summary
-    calcDisplaySummary(currentAccount);
-    console.log("LOGIN");
+    // Update account
+    updateUI(currentAccount);
   }
+});
+
+btnTransfer.addEventListener("click", function (e) {
+  e.preventDefault();
+  const amount = Number(inputTransferAmount.value);
+  // this alone not helpful
+  // const receiverAcc = inputTransferTo.value;
+  const receiverAcc = accounts.find(
+    (acc) => acc.username === inputTransferTo.value
+  );
+  // lose 100 and add to the receiver 100
+
+  inputTransferAmount.value = inputTransferTo.value = "";
+  // if there is not property receiverAcc.username then it will be undefined so false so getout
+  if (
+    amount > 0 &&
+    receiverAcc &&
+    currentAccount.balance >= amount &&
+    receiverAcc?.username !== currentAccount.username
+  ) {
+    currentAccount.movements.push(-amount);
+    receiverAcc.movements.push(amount);
+    // updateUI
+    updateUI(currentAccount);
+  }
+});
+
+// ! Request a loan
+
+btnLoan.addEventListener("click", function (e) {
+  e.preventDefault();
+  const amount = Number(inputLoanAmount.value);
+  // hear the word any then use some
+  if (
+    amount > 0 &&
+    currentAccount.movements.some((mov) => mov >= amount * 0.1)
+  ) {
+    // Add movement
+    currentAccount.movements.push(amount);
+    // Update UI
+    updateUI(currentAccount);
+    inputLoanAmount.value = "";
+  }
+});
+
+// ! Findindex method
+
+// return the fund index not the element itself
+
+// to delete an element in an array we use the splice method
+// and the splice method needs an index to delete the element
+
+btnClose.addEventListener("click", function (e) {
+  e.preventDefault();
+
+  // check cradintioal
+  if (
+    inputCloseUsername.value === currentAccount.username &&
+    Number(inputClosePin.value) === currentAccount.pin
+  ) {
+    const index = accounts.findIndex(
+      (acc) => acc.username === inputCloseUsername.value
+      // no need to check the pain again
+    );
+
+    // indexOf(23)
+    // Delete account
+    accounts.splice(index, 1);
+    // hide UI
+    containerApp.style.opacity = 0;
+  }
+  inputCloseUsername.value = inputClosePin.value = "";
+});
+
+// Tracker
+let sortedState = false;
+
+btnSort.addEventListener("click", function (e) {
+  e.preventDefault();
+
+  displayMovements(currentAccount.movements, !sortedState);
+
+  // Toggle the sorting state for the next click event
+  sortedState = !sortedState;
 });
